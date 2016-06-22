@@ -1,0 +1,34 @@
+<!DOCTYPE html><html><head>
+<meta charset="UTF-8">
+<title>Beast Image Cropper</title>
+<style>
+.dropzone {
+  width: 100px;
+  height: 100px;
+  background: #aaa;
+}
+</style>
+</head><body>
+
+<div class="dropzone" id="dropzone"></div>
+<input type="file" capture="camera" webkitdirectory directory multiple id="file" />
+
+<script>
+const dropzone = require('./lib/dropzone')
+const convert = require('./lib/convert')
+
+dropzone('#dropzone')
+.on('drop', (e) => {
+  let things = Array.prototype.map.call(e.dataTransfer.files, f => f.path)
+  // let things = e.dataTransfer.files.map(f => f.path)
+  convert(things, 980, (err) => {
+    if (err) {
+      return alert(err.message)
+    }
+
+    alert('搞定！')
+  })
+})
+</script>
+
+</body></html>
