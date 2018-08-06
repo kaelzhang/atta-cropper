@@ -96,52 +96,64 @@ export const checkFitOptions = (options, w, h) => {
   return available
 }
 
-// const [
-//   L,
-//   R,
-//   T,
-//   B,
-//   C
-// ] = [
-//   'LEFT',
-//   'RIGHT',
-//   'TOP',
-//   'BOTTOM',
-//   'CENTER'
-// ]
+const [
+  L,
+  R,
+  T,
+  B,
+  C
+] = [
+  'L',
+  'R',
+  'T',
+  'B',
+  'C'
+]
 
-// const CROP_OPTIONS = [
-//   [L, T], [C, T], [R, T],
-//   [L, C], [C, C], [R, C],
-//   [L, B], [C, B], [R, B]
-// ]
+const CROP_OPTIONS = [
+  [L, T], [C, T], [R, T],
+  [L, C], [C, C], [R, C],
+  [L, B], [C, B], [R, B]
+]
 
-// const checkCrop = ([ch, cv], fit) => fit === 'NONE'
-// ? true
-// : fit === 'WIDTH_HEIGHT'
-//   ? ch === null && cv === null
-//     ? true
-//     : false
-//   : fit === 'WIDTH'
-//     ? ch === C
-//     : cv === C
+export const checkCrop = ([ch, cv], fit) => fit === 'NONE'
+// If no crop
+? true
+: fit === 'WIDTH_HEIGHT'
+  ? ch === null && cv === null
+    ? true
+    : false
+  : fit === 'WIDTH'
+    ? ch === C
+    : cv === C
 
-// const FIT_TYPES = {
-//   WIDTH: true,
-//   HEIGHT: true
-// }
+export const cropOptions = () => CROP_OPTIONS.map((crop, index) => ({
+  crop,
+  key: crop.join(''),
+  index,
+  disabled: false,
+  selected: false
+}))
 
-// const checkFitType = v => {
-//   if (v === null) {
-//     return
-//   }
+export const checkCropOptions = (options, fit, selected_index) => {
+  const available = []
+  options.forEach(option => {
+    const {crop, index} = option
+    const valid = checkCrop(crop, fit)
+    option.disabled = !valid
 
-//   if (v in FIT_TYPES) {
-//     return
-//   }
+    if (!valid) {
+      option.selected = false
+      return
+    }
 
-//   throw new TypeError(`invalid fit type ${v}`)
-// }
+    available.push(index)
+    option.selected === index === selected_index
+    console.log('valid inner', index === selected_index, option.selected, options)
+  })
+
+  return available
+}
 
 // const Skema = shape({
 //   width: {
