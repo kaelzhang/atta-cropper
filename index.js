@@ -17,7 +17,8 @@ function createWindow() {
   win = new BrowserWindow({width: 300, height: 300})
 
   // and load the index.html of the app.
-  win.loadURL(`file://${__dirname}/index.html`)
+  // win.loadURL(`file://${__dirname}/index.html`)   // The old way
+  win.loadFile('index.html')
 
   // Open the DevTools.
   win.webContents.openDevTools()
