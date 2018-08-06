@@ -27,7 +27,7 @@
         >{{o.desc}}</option>
       </select>
     </div>
-    <div class="field" v-if="fit">
+    <div class="field" v-if="fit && fit !== 'WIDTH_HEIGHT'">
       <label>crop: {{crop}}</label>
       <ul>
         <li
