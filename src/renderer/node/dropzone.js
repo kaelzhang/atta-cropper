@@ -2,7 +2,6 @@
 
 module.exports = dropzone
 
-const $ = require('jquery')
 const {EventEmitter} = require('events')
 
 function dropzone (element) {

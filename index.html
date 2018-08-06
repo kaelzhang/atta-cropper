@@ -1,19 +1,16 @@
 <!DOCTYPE html><html><head>
 <meta charset="UTF-8">
 <title>ATTA Image Cropper</title>
-<style>
-.dropzone {
-  width: 100px;
-  height: 100px;
-  background: #aaa;
-}
-</style>
+
 </head><body>
 
 <div class="dropzone" id="dropzone">Drop Images Here</div>
 <input type="file" capture="camera" webkitdirectory directory multiple id="file" />
+<div id="panel"></div>
 
 <script>
+const Vue = require('vue')
+
 const dropzone = require('./lib/dropzone')
 const convert = require('./lib/convert')
 

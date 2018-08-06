@@ -7,10 +7,19 @@ class Image {
     this.filename = filename
   }
 
-  size (width, height) {
+  size ({
+    width,
+    height,
+    fit,
+    crop
+  }) {
     this.width = width
     this.height = height
     return this
+  }
+
+  quality (quality) {
+    this.quality = quality
   }
 
   _write (output, options, callback) {
