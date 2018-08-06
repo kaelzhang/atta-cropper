@@ -116,6 +116,8 @@ const CROP_OPTIONS = [
   [L, B], [C, B], [R, B]
 ]
 
+export const getCrop = index => CROP_OPTIONS[index] || [null, null]
+
 export const checkCrop = ([ch, cv], fit) => fit === 'NONE'
 // If no crop
 ? true
@@ -137,6 +139,7 @@ export const cropOptions = () => CROP_OPTIONS.map((crop, index) => ({
 
 export const checkCropOptions = (options, fit, selected_index) => {
   const available = []
+
   options.forEach(option => {
     const {crop, index} = option
     const valid = checkCrop(crop, fit)
@@ -148,8 +151,7 @@ export const checkCropOptions = (options, fit, selected_index) => {
     }
 
     available.push(index)
-    option.selected === index === selected_index
-    console.log('valid inner', index === selected_index, option.selected, options)
+    option.selected = index === selected_index
   })
 
   return available

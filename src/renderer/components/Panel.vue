@@ -9,7 +9,7 @@
       <label for="height">height: {{h}}</label>
       <input name="height" v-model.number="h" />
     </div>
-    <div class="field">
+    <div class="field" v-if="fit">
       <label for="width">fit: {{fitDesc}}</label>
       <select name="fit" v-model="fit">
         <option
@@ -20,7 +20,8 @@
         >{{o.desc}}</option>
       </select>
     </div>
-    <div class="field">
+    <div class="field" v-if="fit">
+      <label>crop: {{crop}}</label>
       <ul>
         <li
           v-for="o in crops"
@@ -50,6 +51,7 @@ import {
   fitOptions,
   getFitDesc,
   checkFit,
+  getCrop,
   cropOptions,
   checkCrop,
   checkCropOptions
@@ -60,6 +62,12 @@ function watchSize () {
     w, h, fit, fits
   } = this
   const available = checkFitOptions(fits, w, h)
+
+  if (!fit) {
+    this.fit = available[0]
+    return
+  }
+
   const valid = checkFit(fit, w, h)
 
   if (!valid) {
@@ -90,22 +98,24 @@ export default {
   },
   computed: {
     fitDesc () {
-      console.log('this.fit', this.fit)
       return getFitDesc(this.fit)
     },
 
     crop () {
-      const selected = this.crops[this.crop_index]
-      return selected
-        ? selected.crop
-        : [null, null]
+      return getCrop(this.crop_index)
     }
   },
   watch: {
     w: watchSize,
     h: watchSize,
-    fit () {
-      console.log(arguments)
+    fit (fit) {
+      const crop = getCrop(this.crop_index)
+      const valid = checkCrop(crop, fit)
+      if (!valid) {
+        this.crop_index = -1
+      }
+
+      checkCropOptions(this.crops, fit, this.crop_index)
     }
   },
   components: {
@@ -113,7 +123,6 @@ export default {
   },
   methods: {
     selectCrop (o) {
-      console.log(o)
       const {fit} = this
       const valid = checkCrop(o.crop, fit)
 
