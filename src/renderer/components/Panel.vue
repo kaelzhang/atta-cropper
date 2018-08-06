@@ -1,6 +1,13 @@
 <template>
   <div>
-    <drop-zone :w="w" :h="h" :fit="fit" :crop="crop"></drop-zone>
+    <drop-zone
+      :w="w"
+      :h="h"
+      :fit="fit"
+      :crop="crop"
+      :ext="ext"
+      :quality="quality"
+    ></drop-zone>
     <div class="field">
       <label for="width">width: {{w}}</label>
       <input name="width" v-model.number="w" />
@@ -31,6 +38,20 @@
         >{{o.index}}: {{o.key}}</li>
       </ul>
     </div>
+    <div class="field">
+      <label for="ext">ext: {{ext}}</label>
+      <select name="ext" v-model="ext">
+        <option>jpg</option>
+        <option>png</option>
+      </select>
+    </div>
+    <!-- <div class="field" v-if="">
+      <label for="ext">ext: {{ext}}</label>
+      <select name="ext" v-model="ext">
+        <option>jpg</option>
+        <option>png</option>
+      </select>
+    </div> -->
   </div>
 </template>
 
@@ -87,13 +108,18 @@ export default {
     const crops = cropOptions()
     checkCropOptions(crops, fit, crop_index)
 
+    const ext = 'jpg'
+    const quality = 90
+
     return {
       w,
       h,
       fit,
       crop_index,
       fits,
-      crops
+      crops,
+      ext,
+      quality
     }
   },
   computed: {

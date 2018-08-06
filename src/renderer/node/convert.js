@@ -1,42 +1,30 @@
-'use strict'
+import Image from './image'
+import fse from 'fs-extra'
+import path from 'path'
+import fs from 'fs'
+import pLimit from 'p-limit'
 
-module.exports = convert
+const limit = pLimit(30)
 
-const Image = require('./image')
-const expand = require('fs-expand')
-const fse = require('fs-extra')
-const node_path = require('path')
-const fs = require('fs')
-const async = require('async')
-
-
-function convert (things, size, callback) {
-  async.each(things, (something, done) => {
-    convert_one(something, size, done)
-  }, callback)
+export const convert = (paths, options) => {
+  const tasks = paths.map(p => convertOne(p, options))
+  return Promise.all(tasks)
 }
 
 
-function convert_one (something, size, callback) {
-  fs.stat(something, (err, stat) => {
-    if (err) {
-      return callback(err)
-    }
+const convertOne = async (p, options) => {
+  const stat = await fs.stat(p)
 
-    if (stat.isFile()) {
-      convert_file(something, size, callback)
-      return
-    }
+  if (stat.isFile()) {
+    return convertFile(p, options)
+  }
 
-    if (stat.isDirectory()) {
-      convert_dir(something, size, callback)
-      return
-    }
+  if (stat.isDirectory()) {
+    return convertDir(p, options)
+  }
 
-    callback(new Error('only files and dirs are supported!'))
-  })
+  throw new Error('only files and dirs are supported!')
 }
-
 
 const REGEX_REPLACE_EXT = /\.[a-z0-9]+$/
 

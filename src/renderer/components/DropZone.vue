@@ -31,14 +31,27 @@
 </style>
 
 <script>
+// import {convert} from '@/node/convert'
 
+const {map} = Array.prototype
 
 export default {
-  props: ['w', 'h', 'fit', 'crop'],
+  props: ['w', 'h', 'fit', 'crop', 'ext', 'quality'],
   methods: {
     convert (e) {
-      console.log(e.dataTransfer.files)
-      console.log(this.w, this.h, this.fit, this.crop)
+      const paths = map.call(e.dataTransfer.files, f => f.path)
+      const {w, h, fit, crop} = this
+
+      if (!w && !h) {
+        alert('width or width must be specified')
+        return
+      }
+
+      convert(paths, {
+        w, h, fit, crop
+      }).then(() => {
+        alert('搞定!')
+      })
     }
   }
 }
