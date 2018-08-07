@@ -31,16 +31,16 @@
 </style>
 
 <script>
-// import {convert} from '@/node/convert'
+import {convert} from '@/node/convert'
 
 const {map} = Array.prototype
 
 export default {
-  props: ['w', 'h', 'fit', 'crop', 'ext', 'quality'],
+  props: ['w', 'h', 'fit', 'crop', 'ext', 'q'],
   methods: {
     convert (e) {
       const paths = map.call(e.dataTransfer.files, f => f.path)
-      const {w, h, fit, crop} = this
+      const {w, h, fit, crop, ext, q} = this
 
       if (!w && !h) {
         alert('width or width must be specified')
@@ -48,7 +48,7 @@ export default {
       }
 
       convert(paths, {
-        w, h, fit, crop
+        w, h, fit, crop, ext, q
       }).then(() => {
         alert('搞定!')
       })

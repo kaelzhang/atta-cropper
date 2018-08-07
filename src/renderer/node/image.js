@@ -2,51 +2,81 @@ const gm = require('gm').subClass({
   imageMagick: true
 })
 
-class Image {
+const replaceExt = (str, ext) => str.replace(/(\.[a-z0-9]+)?$/i, `.${ext}`)
+
+export default class Image {
   constructor (filename) {
     this.filename = filename
   }
 
-  size ({
-    width,
-    height,
-    fit,
-    crop
-  }) {
-    this.width = width
-    this.height = height
+  size (options) {
+    this.crop_options = options
     return this
   }
 
   quality (quality) {
-    this.quality = quality
+    this.q = quality
+    return this
   }
 
-  _write (output, options, callback) {
+  format (ext) {
+    this.ext = ext
+    return this
+  }
+
+  _write (output, callback) {
+    console.log('ext', this.ext)
+    output = replaceExt(output, this.ext)
+    const self = this
+
     gm(this.filename).size(function (err, size) {
       if (err) {
         return callback(err)
       }
 
-      let w = size.width
-      let h = size.height
-      let x
-      let y
-      let s
+      const {
+        width: ow,
+        height: oh
+      } = size
 
-      if (w > h) {
-        y = 0
-        x = (w - h) / 2
-        s = h
+      const {
+        fit,
+        crop: [ch, cv]
+      } = self.crop_options
 
-      } else {
-        x = 0
-        y = h - w
-        s = w
+      let {
+        w, h
+      } = self.crop_options
+
+      const {q, ext} = self
+
+      if (fit === 'WIDTH') {
+        h = h || oh * w / ow
       }
 
-      this.crop(s, s, x, y)
-      this.resize(this._size)
+      const need_resize = fit !== 'NONE'
+
+      if (true) {
+
+      }
+
+      // if (w > h) {
+      //   y = 0
+      //   x = (w - h) / 2
+      //   s = h
+
+      // } else {
+      //   x = 0
+      //   y = h - w
+      //   s = w
+      // }
+      // this.crop(100, 100, 0, 0)
+
+      // /Users/kael/Desktop/a/aaa__w100_h100_fitNONE_cropNONE_q90.jpg
+
+      this.resize(500, 300, '<')
+      // this.crop(s, s, x, y)
+      // this.resize(this._size)
       this.write(output, callback)
     })
   }
@@ -63,6 +93,3 @@ class Image {
     })
   }
 }
-
-
-module.exports = Image

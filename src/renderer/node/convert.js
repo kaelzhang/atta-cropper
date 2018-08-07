@@ -1,19 +1,84 @@
-import Image from './image'
+import {isArray} from 'core-util-is'
 import fse from 'fs-extra'
 import path from 'path'
-import fs from 'fs'
 import pLimit from 'p-limit'
+import globby from 'globby'
+
+import Image from './image'
 
 const limit = pLimit(30)
 
-export const convert = (paths, options) => {
-  const tasks = paths.map(p => convertOne(p, options))
-  return Promise.all(tasks)
+const CROPPER_DIVIDER = '__'
+const CROPPER_JOINER = '_'
+const KEYS = ['w', 'h', 'fit', 'crop', 'q']
+const DEFAULT_EXT = 'jpg'
+const stringifyValue = v => v
+  ? isArray(v)
+    ? v.map(v => v || '').join('') || 'NONE'
+    : v
+  : 'NONE'
+
+const stringify = options =>
+  KEYS.map(key => `${key}${stringifyValue(options[key])}`).join(CROPPER_JOINER)
+
+const getOutput = (src, options) => {
+  const original_ext = path.extname(src)
+  const basenames = path.basename(src, original_ext).split(CROPPER_DIVIDER)
+  const dirname = path.dirname(src)
+
+  if (basenames.length > 1) {
+    basenames.pop()
+  }
+
+  const basename = basenames.join(CROPPER_DIVIDER)
+  return path.join(
+    dirname,
+    `${basename}${CROPPER_DIVIDER}${stringify(options)}`
+  )
 }
 
 
-const convertOne = async (p, options) => {
-  const stat = await fs.stat(p)
+// const convertOne = console.log
+const convertOne = (file, output, options) => limit(
+  () => new Image(file)
+  .size(options)
+  .quality(options.q)
+  .format(options.ext)
+  .write(output)
+)
+
+const convertFile = (file, options) => {
+  const output = getOutput(file, options)
+  return convertOne(file, output, options)
+}
+
+const isFile = f => !/\/$/.test(f)
+
+const convertDir = async (dir, options) => {
+  const output_dir = getOutput(dir, options)
+  const globbed = await globby('**', {
+    cwd: dir,
+    mark: true
+  })
+
+  const files = globbed.filter(isFile)
+  await fse.ensureDir(output_dir)
+
+  return convertFiles(files, dir, output_dir, options)
+}
+
+const convertFiles = (files, from, to, options) => {
+  const tasks = files.map(f => {
+    const src = path.join(from, f)
+    const output = path.join(to, f)
+    return convertOne(src, output, options)
+  })
+
+  return Promise.all(tasks)
+}
+
+const createConvertTask = async (p, options) => {
+  const stat = await fse.stat(p)
 
   if (stat.isFile()) {
     return convertFile(p, options)
@@ -26,57 +91,7 @@ const convertOne = async (p, options) => {
   throw new Error('only files and dirs are supported!')
 }
 
-const REGEX_REPLACE_EXT = /\.[a-z0-9]+$/
-
-function convert_file (file, size, callback) {
-  let output_file = file.replace(REGEX_REPLACE_EXT, (m) => {
-    return `-${size}x${size}${m}`
-  })
-
-  new Image(file).size(size).write(output_file, callback)
-}
-
-
-function convert_dir (dir, size, callback) {
-  let output = `${dir}-${size}x${size}`
-  let files
-
-  async.parallel([
-    (done) => {
-      expand('**/*', {
-        cwd: dir,
-        filter: 'isFile'
-
-      }, (err, _files) => {
-        if (err) {
-          return done(err)
-        }
-
-        files = _files
-        done(null)
-      })
-    },
-
-    (done) => {
-      fse.ensureDir(output, done)
-    }
-
-  ], (err) => {
-    if (err) {
-      return callback(err)
-    }
-
-    convert_files(files, dir, output, size, callback)
-  })
-}
-
-
-function convert_files (files, source_dir, output_dir, size, callback) {
-  async.each(files, (file, done) => {
-    let src = node_path.join(source_dir, file)
-    let dest = node_path.join(output_dir, file)
-    // done = once(done)
-    new Image(src).size(size).write(dest, done)
-
-  }, callback)
+export const convert = (paths, options) => {
+  const tasks = paths.map(p => createConvertTask(p, options))
+  return Promise.all(tasks)
 }

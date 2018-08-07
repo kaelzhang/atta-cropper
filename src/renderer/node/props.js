@@ -54,7 +54,7 @@ const FIT_OPTIONS_DEF = {
     }
   },
 
-  WIDTH_HEIGHT: {
+  BOTH: {
     desc: '同时缩放宽高',
     condition (w, h) {
       return isNumeric(w) && isNumeric(h)
@@ -121,13 +121,15 @@ export const getCrop = index => CROP_OPTIONS[index] || [null, null]
 export const checkCrop = ([ch, cv], fit) => fit === 'NONE'
 // If no crop
 ? true
-: fit === 'WIDTH_HEIGHT'
+: fit === 'BOTH'
   ? ch === null && cv === null
     ? true
     : false
   : fit === 'WIDTH'
     ? ch === C
     : cv === C
+
+export const checkCropIndex = (index, fit) => checkCrop(getCrop(index), fit)
 
 export const cropOptions = () => CROP_OPTIONS.map((crop, index) => ({
   crop,
