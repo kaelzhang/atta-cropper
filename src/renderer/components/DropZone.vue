@@ -50,7 +50,7 @@ export default {
       convert(paths, {
         w, h, fit, crop, ext, q
       }).then(() => {
-        alert('搞定!')
+
       })
     }
   }

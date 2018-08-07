@@ -38,16 +38,16 @@
         >{{o.key}}</li>
       </ul>
     </div>
-    <div class="field">
+    <div class="field" v-if="fit">
       <label for="ext">ext: {{ext}}</label>
       <select name="ext" v-model="ext">
         <option>jpg</option>
         <option>png</option>
       </select>
     </div>
-    <div class="field" v-if="">
-      <label for="ext">quality: {{q}}</label>
-      <input name="ext" v-model.number="q" />
+    <div class="field" v-if="fit">
+      <label for="q">quality: {{q}}</label>
+      <input name="q" v-model.number="q" />
     </div>
   </div>
 </template>
@@ -149,7 +149,7 @@ export default {
       const {crop_index} = this
 
       if (crop_index === -1 || !checkCropIndex(crop_index, fit)) {
-        this.crop_index === checkCropIndex(CC_INDEX, fit)
+        this.crop_index = checkCropIndex(CC_INDEX, fit)
           ? CC_INDEX
           : -1
       }

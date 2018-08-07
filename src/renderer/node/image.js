@@ -3,6 +3,30 @@ const gm = require('gm').subClass({
 })
 
 const replaceExt = (str, ext) => str.replace(/(\.[a-z0-9]+)?$/i, `.${ext}`)
+const [
+  BEGIN,
+  CENTER,
+  END
+] = [
+  () => 0,
+  // size, resized
+  (s, r) => Math.max(0, (r - s) / 2),
+  (s, r) => Math.max(0, r - s)
+]
+
+const CROP_CALCULATOR = {
+  WIDTH: {
+    L: BEGIN,
+    C: CENTER,
+    R: END
+  },
+
+  HEIGHT: {
+    T: BEGIN,
+    C: CENTER,
+    B: END
+  }
+}
 
 export default class Image {
   constructor (filename) {
@@ -25,8 +49,9 @@ export default class Image {
   }
 
   _write (output, callback) {
-    console.log('ext', this.ext)
-    output = replaceExt(output, this.ext)
+    const {q, ext} = this
+
+    output = replaceExt(output, ext)
     const self = this
 
     gm(this.filename).size(function (err, size) {
@@ -48,35 +73,46 @@ export default class Image {
         w, h
       } = self.crop_options
 
-      const {q, ext} = self
+      // If h is unset -> fit must be WIDTH or NONE -> then calculate h
+      h = h || oh * w / ow
+      w = w || ow * h / oh
 
-      if (fit === 'WIDTH') {
-        h = h || oh * w / ow
+      // The image size after resizing
+      let rw = ow
+      let rh = oh
+
+      switch (fit) {
+        case 'WIDTH':
+          rw = w
+          rh = oh * w / ow
+          this.resize(rw, rh)
+          break
+
+        case 'HEIGHT':
+          rw = ow * h / oh
+          rh = h
+          this.resize(rw, rh)
+          break
+
+        case 'BOTH':
+          rw = w
+          rh = h
+          // Force fitting which might causes streching
+          this.resize(rw, rh, '!')
+          break
       }
 
-      const need_resize = fit !== 'NONE'
+      if (ch && cv) {
+        const x = CROP_CALCULATOR.WIDTH[ch](w, rw)
+        const y = CROP_CALCULATOR.HEIGHT[cv](h, rh)
 
-      if (true) {
-
+        this.crop(w, h, x, y)
       }
 
-      // if (w > h) {
-      //   y = 0
-      //   x = (w - h) / 2
-      //   s = h
+      if (q) {
+        this.quality(q)
+      }
 
-      // } else {
-      //   x = 0
-      //   y = h - w
-      //   s = w
-      // }
-      // this.crop(100, 100, 0, 0)
-
-      // /Users/kael/Desktop/a/aaa__w100_h100_fitNONE_cropNONE_q90.jpg
-
-      this.resize(500, 300, '<')
-      // this.crop(s, s, x, y)
-      // this.resize(this._size)
       this.write(output, callback)
     })
   }
