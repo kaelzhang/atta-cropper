@@ -10,7 +10,7 @@
     @dragenter.stop.prevent
     @dragleave.stop.prevent
     @drop.stop.prevent="convert"
-  >Drop Images Here</div>
+  >Drop Images or Directories Here</div>
   <div>progress: {{progress}}%, {{finished}} / {{total}}</div>
   <div
     :class="{success: success, fail: !success, message: true}"
