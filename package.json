@@ -56,7 +56,7 @@
   "dependencies": {
     "core-util-is": "^1.0.2",
     "fs-extra": "^7.0.0",
-    "globby": "^8.0.1",
+    "glob": "^7.1.2",
     "gm": "^1.22.0",
     "vue": "^2.5.17",
     "vue-electron": "^1.0.6"

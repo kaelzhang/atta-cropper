@@ -2,9 +2,10 @@ import {isArray} from 'core-util-is'
 import fse from 'fs-extra'
 import path from 'path'
 import pLimit from 'p-limit'
-import globby from 'globby'
+import glob from 'glob'
 
 import Image from './image'
+import { callbackify } from 'util';
 
 const limit = pLimit(30)
 
@@ -53,31 +54,56 @@ const convertFile = (file, options) => {
 }
 
 const isFile = f => !/\/$/.test(f)
+const globby = (pattern, options) => new Promise((resolve, reject) => {
+  glob(pattern, options, (err, files) => {
+    if (err) {
+      return reject(err)
+    }
 
-const convertDir = async (dir, options) => {
+    resolve(files)
+  })
+})
+
+const convertDir = async (dir, options, onProgress) => {
   const output_dir = getOutput(dir, options)
-  const globbed = await globby('**', {
+  const globbed = await globby('**/*', {
     cwd: dir,
     mark: true
   })
 
-  const files = globbed.filter(isFile)
-  await fse.ensureDir(output_dir)
+  const dirs = [output_dir]
+  const files = globbed.filter(f => {
+    const is = isFile(f)
+    if (!is) {
+      dirs.push(path.join(output_dir, f))
+    }
 
-  return convertFiles(files, dir, output_dir, options)
+    return is
+  })
+
+  await Promise.all(dirs.map(d => fse.ensureDir(d)))
+
+  return convertFiles(files, dir, output_dir, options, onProgress)
 }
 
-const convertFiles = (files, from, to, options) => {
+const convertFiles = (files, from, to, options, onProgress) => {
+  const total = files.length
+  let count = 0
+
   const tasks = files.map(f => {
     const src = path.join(from, f)
     const output = path.join(to, f)
     return convertOne(src, output, options)
+    .then(() => {
+      count ++
+      onProgress(count, total)
+    })
   })
 
   return Promise.all(tasks)
 }
 
-const createConvertTask = async (p, options) => {
+const createConvertTask = async (p, options, onProgress) => {
   const stat = await fse.stat(p)
 
   if (stat.isFile()) {
@@ -85,13 +111,13 @@ const createConvertTask = async (p, options) => {
   }
 
   if (stat.isDirectory()) {
-    return convertDir(p, options)
+    return convertDir(p, options, onProgress)
   }
 
   throw new Error('only files and dirs are supported!')
 }
 
-export const convert = (paths, options) => {
-  const tasks = paths.map(p => createConvertTask(p, options))
+export const convert = (paths, options, onProgress) => {
+  const tasks = paths.map(p => createConvertTask(p, options, onProgress))
   return Promise.all(tasks)
 }
