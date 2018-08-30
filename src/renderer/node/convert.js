@@ -5,14 +5,12 @@ import pLimit from 'p-limit'
 import glob from 'glob'
 
 import Image from './image'
-import { callbackify } from 'util';
 
 const limit = pLimit(30)
 
 const CROPPER_DIVIDER = '__'
 const CROPPER_JOINER = '_'
 const KEYS = ['w', 'h', 'fit', 'crop', 'q']
-const DEFAULT_EXT = 'jpg'
 const stringifyValue = v => v
   ? isArray(v)
     ? v.map(v => v || '').join('') || 'NONE'
