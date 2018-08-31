@@ -1,5 +1,6 @@
 const gm = require('gm').subClass({
-  imageMagick: true
+  imageMagick: true,
+  appPath: '/usr/local/bin/'
 })
 
 const replaceExt = (str, ext) => str.replace(/(\.[a-z0-9]+)?$/i, `.${ext}`)
