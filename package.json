@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "cropper",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": "Kael Zhang <i+github@kael.me>",
   "description": "An electron-vue project",
   "license": "MIT",
@@ -27,6 +27,12 @@
     },
     "files": [
       "dist/electron/**/*"
+    ],
+    "extraFiles": [
+      {
+        "from": "bin",
+        "to": "Resources/bin"
+      }
     ],
     "dmg": {
       "contents": [

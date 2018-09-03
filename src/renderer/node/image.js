@@ -1,6 +1,14 @@
+const path = require('path')
+const {fixPathForAsarUnpack} = require('electron-util')
+
+// Dev
+// src/renderer/node -> src/bin
+// Resources/app.asar/dist/electron  ->
+const appPath = path.join(__dirname, '..', '..', '..', 'bin') + '/'
+
 const gm = require('gm').subClass({
   imageMagick: true,
-  appPath: '/usr/local/bin/'
+  appPath
 })
 
 const replaceExt = (str, ext) => str.replace(/(\.[a-z0-9]+)?$/i, `.${ext}`)
